@@ -5,6 +5,7 @@ import numpy as np
 
 from __init__ import FourierTransform, soft_window
 from calc_kernnel_johannes import IonProb, IonRate
+from field_functions import LaserField
 
 class AU:
     meter = 5.2917720859e-11 # atomic unit of length in meters
@@ -122,6 +123,11 @@ file_params = [
     #("1200nm_320nm_1.00e+14", 1200, 1e14, 320, 4e10, 0.75, 0, 5),
     #("1200nm_320nm_5.00e+14", 1200, 5e14, 320, 4e10, 0.75, 0, 5)
 ]
+
+laser_pulses = LaserField(cache_results=True)
+
+laser_pulses.add_pulse(850, 1.25e14, 0, 850/ AtomicUnits.nm / AtomicUnits.speed_of_light, 0)
+laser_pulses.add_pulse(350, 1e10, -np.pi/2, 0.93/AtomicUnits.fs, tau)
 
 for file_name, lam0_pump, I_pump, lam0_probe, I_probe, FWHM_probe, phase_add, x_lim_ion_yield in file_params:
     data_rate_delay = pd.read_csv(f"/home/user/TIPTOE/plot_ion_tau_calc_output_data/ion_prob_QS_NA_{file_name}.csv")

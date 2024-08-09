@@ -28,7 +28,6 @@ class AtomicUnits:
     PW_per_cm2_au = 0.02849451308 # PW/cm^2 in atomic units
 
 
-
 # @njit(parallel=True, fastmath = False,cache = True)
 def cosN_vector_potential(t, A0, w0, tau, cep, N):
     return - A0 * np.cos(0.5*np.pi*t/tau)**N * np.sin(w0*t-cep)
