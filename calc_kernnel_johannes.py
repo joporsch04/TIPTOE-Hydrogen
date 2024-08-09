@@ -4,7 +4,6 @@ import numpy as np
 from numpy import interp as interp1d
 from scipy.interpolate import UnivariateSpline
 from scipy.integrate import simpson
-#import matplotlib.pyplot as plt
 
 
 pi=np.pi
@@ -217,11 +216,12 @@ def IonRate(t_grid, t_field, input_field, c1, e1, e2, e2n, e2d,a1, a2, b1, b2, b
 	tAr=np.arange(-N*dT-2*dT,N*dT+dT, dT, dtype=np.float32)
 	EF=UnivariateSpline(t_field, input_field, k=5, s=0, ext=1 )(tAr)
 	f, phase=Kernel_jit(t_grid, T_grid, EF, c1, e1, e2, e2n, e2d,a1, a2, b1, b2, b3, b4, p1, dTi, Ip)
-	return IOF(T_grid, f, phase)
+	return 2*np.real(IOF(T_grid, f, phase))
 
 
 def IonProb(t_field, input_field, c1, e1, e2, e2n, e2d,a1, a2, b1, b2, b3, b4, p1, dTi, Ip, dt=1, PulseN=8):
 	""" return the ionization probability for the defined pulse computed with provided parameters """
+	#remove_irrelevant_data(t_field, input_field, 1e-5)
 	ElecField=lambda t: interp1d(t, t_field, input_field)
 	t_grid=np.arange(t_field[0],t_field[-1]+1,1) 
 	# extr=find_extrema_positions(t_grid, ElecField(t_grid))
@@ -279,8 +279,3 @@ def remove_irrelevant_data(time, field, x):
 # 	profiler.disable()
 # 	stats = pstats.Stats(profiler).sort_stats('cumtime')
 	#stats.print_stats()
-
-
-
-	### warum funktioniert remove_irr.. erst ab 1e-9? liegt daran das extr gleich bleibt und dann bei zb 1e-5 
-	### in zeroCr kein element kleiner ist als extr[0] 

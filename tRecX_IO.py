@@ -29,12 +29,13 @@ def tRecX_write_inp(csv_file, Objectives=[], single_shot=False):
         
         d1 =data['tau_drive'] +1.2*data['tau_injection'] /data['N_injection']
         d2 =data['tau_drive'] +1.2*data['tau_injection']
+        print(d1,'d1')
         d3=d2#+3*data['tau_injection'] /data['N_injection']
         if data['N_injection']==0:
                 delay_array=np.unique(np.round(np.concatenate((np.linspace(-data['tau_drive'], data['tau_drive'], data['N_drive']),[0]))/AU.second,2))
         else:
             delay_array=np.unique(np.round(np.concatenate((np.linspace(-d2, -d1, data['N_injection']),np.linspace(-data['tau_drive'], data['tau_drive'], data['N_drive']),[0], np.linspace(d1, d3, data['N_injection'])))/AU.second,2))
-
+        delay_array=np.linspace(-6,6,121)*1e-15/AU.second
         #delay_array=np.linspace(-3*data['drive_FWHM_relative'], 3*data['drive_FWHM_relative'], data['N_drive'])
         if data['convergence_test_bool']==True:
             print('duration of the sampling pulse: ', data['tau_injection'])
