@@ -35,7 +35,7 @@ def tRecX_write_inp(csv_file, Objectives=[], single_shot=False):
                 delay_array=np.unique(np.round(np.concatenate((np.linspace(-data['tau_drive'], data['tau_drive'], data['N_drive']),[0]))/AU.second,2))
         else:
             delay_array=np.unique(np.round(np.concatenate((np.linspace(-d2, -d1, data['N_injection']),np.linspace(-data['tau_drive'], data['tau_drive'], data['N_drive']),[0], np.linspace(d1, d3, data['N_injection'])))/AU.second,2))
-        delay_array=np.linspace(-6,6,121)*1e-15/AU.second
+        #delay_array=np.linspace(-6,6,121)*1e-15/AU.second
         #delay_array=np.linspace(-3*data['drive_FWHM_relative'], 3*data['drive_FWHM_relative'], data['N_drive'])
         if data['convergence_test_bool']==True:
             print('duration of the sampling pulse: ', data['tau_injection'])
@@ -328,7 +328,7 @@ def row_wise_submit(csv_file, submit_max_from_input=False, use_gnu_par=False, si
         #    dependency=f"sbatch --dependency=afterok:{message}"      
 
 
-def row_wise_submit_local(csv_file, submit_max_from_input=False):
+def row_wise_submit_local(csv_file, submit_max_from_input=False, ncores=4):
     mainDir=os.getcwd()
     tRecX_df=pd.read_csv(os.path.join(mainDir,csv_file))
     tRecX_exec=os.path.join(os.environ['HOME'],'tRecX','tRecX')
@@ -342,7 +342,7 @@ def row_wise_submit_local(csv_file, submit_max_from_input=False):
         elif 'HOST' not in list(os.environ.keys()):
             array_max=len(next(os.walk(base))[1])
             for j in range(array_max):
-                print(os.system(f"mpirun -n 4 {tRecX_exec} {base}/{j}/inpc"))
+                print(os.system(f"mpirun -n {ncores} {tRecX_exec} {base}/{j}/inpc"))
 
         #if type()message=message.split(' ')[-1]
         #if (i+1)%2==0:

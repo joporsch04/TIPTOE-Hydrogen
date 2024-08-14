@@ -12,7 +12,6 @@
 from numba import njit, prange
 import numexpr as ne
 import numpy as np
-import matplotlib.pyplot as plt
 
 class AtomicUnits:
     meter = 5.2917720859e-11 # atomic unit of length in meters
@@ -26,6 +25,7 @@ class AtomicUnits:
     speed_of_light = 137.035999 # vacuum speed of light in atomic units
     Coulomb = 1.60217646e-19 # atomic unit of electric charge in Coulombs
     PW_per_cm2_au = 0.02849451308 # PW/cm^2 in atomic units
+
 
 
 # @njit(parallel=True, fastmath = False,cache = True)
@@ -373,10 +373,9 @@ class LaserField:
     def get_number_of_pulses(self):
         return self.__number_of_pulses
 
-    def add_pulse(self, central_wavelength, peak_intensity, CEP, FWHM, delay, envelope_N=8, t0=0.0):
+    def add_pulse(self, central_wavelength, peak_intensity, CEP, FWHM, envelope_N=8, t0=0.0):
         au = AtomicUnits()
         self.__number_of_pulses += 1
-        self.__central_wavelength_list.append(central_wavelength)
         w0 = 2*np.pi*au.speed_of_light / (central_wavelength / au.nm)
         self.__omega0_list.append(w0)
         self.__A0_list.append(np.sqrt(peak_intensity/1e15 * 0.02849451308 / w0**2))
@@ -385,8 +384,6 @@ class LaserField:
         self.__t0_list.append(t0)
         self.__envelope_N_list.append(envelope_N)
         self.__tau_list.append(np.pi*FWHM/(4*np.arccos(2**(-1/(2*envelope_N)))))
-        self.__delay_list.append(delay)
-        # print(w0, self.__A0_list[-1], self.__tau_list[-1]) # DEBUGGING
 
     def get_time_interval(self):
         if self.__number_of_pulses <= 0:
@@ -397,14 +394,10 @@ class LaserField:
             t_min = min(t_min, self.__t0_list[i] - self.__tau_list[i])
             t_max = max(t_max, self.__t0_list[i] + self.__tau_list[i])
         return (t_min, t_max)
-    
-    def get_time_array(self, dt=1.):
-        return np.arange(*self.get_time_interval(), dt)
 
 
     def reset(self, cache_results=True):
         self.__number_of_pulses = 0
-        self.__central_wavelength_list = []
         self.__omega0_list = []
         self.__A0_list = []
         self.__CEP_list = []
@@ -412,7 +405,6 @@ class LaserField:
         self.__t0_list = []
         self.__envelope_N_list = []
         self.__tau_list = []
-        self.__delay_list = []
         self.__cache_results = cache_results
         self.__cached_t_for_A = None
         self.__cached_A = None
@@ -468,7 +460,7 @@ class LaserField:
                 continue
             tau = self.__tau_list[i]
             N = self.__envelope_N_list[i]
-            tt = t - self.__t0_list[i] + self.__delay_list[i]
+            tt = t - self.__t0_list[i]
             cep = self.__CEP_list[i]
             Field += np.where(np.abs(tt) < tau, cosN_electric_field(tt, A0, w0, tau, cep, N), 0)
         if self.__cache_results == True:
@@ -555,24 +547,3 @@ class LaserField:
         if self.__cache_results == True:
             self.__cached_int_E2 = result.copy()
         return result
-
-
-
-
-
-
-laser_pulses = LaserField(cache_results=True)
-
-laser_pulses.add_pulse(850, 1.25e14, 0, 117.21, 0)
-laser_pulses.add_pulse(850, 6e10, 0, 117.21, 250)
-laser_pulses.add_pulse(850, 3e11, 0, 117.21, -200)
-
-#t = laser_pulse.get_time_interval()
-t = laser_pulses.get_time_array()
-
-
-plt.plot(t, laser_pulses.Electric_Field(t))
-plt.show()
-plt.close()
-
-params={'Multiplier': 24.885006619192506, 'Ip': 0.499790528969476, 'αPol': 4.51, 'gamma': 3.0012573529411766, 'e0': 2.000419117647059, 'a0': 1, 'a1': 1.2506286764705883, 'b0': -0.00010482328986949341, 'b1': 1, 'b2': 6.127, 'c2': 0.37339566825214854, 'p1': 3.5, 'd1': 8.156654923237362}
