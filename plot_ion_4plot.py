@@ -121,8 +121,8 @@ def plot_ion_4(ion_QS, ion_y, ion_na, ion_na_reconstructed, nArate, delay, field
     ax3.plot(omega/2/np.pi, np.abs(ion_y_resp), label=rf'$\mathrm{{P}}_\mathrm{{tRecX}}$')
     ax3.plot(omega/2/np.pi, np.abs(ion_QS_resp), label=rf'$\mathrm{{P}}_\mathrm{{QS}}$')
     ax3.plot(omega/2/np.pi, np.abs(ion_nonAdiabatic_resp), label=rf'$\mathrm{{P}}_\mathrm{{nonAdiabatic}}$')
-    ax3.plot(omega/2/np.pi, np.abs(ion_nonAdiabatic_reconstructed_resp), label=rf'$\mathrm{{P}}_\mathrm{{nonAdiabatic}}$')
-    ax3.plot(omega/2/np.pi, np.abs(ion_nonAdiabatic_reponse_full), label=rf'$\mathrm{{P}}_\mathrm{{nonAdRecon}}$')
+    ax3.plot(omega/2/np.pi, np.abs(ion_nonAdiabatic_reconstructed_resp), label=rf'$\mathrm{{P}}_\mathrm{{nonAdiabaticRecon}}$')
+    ax3.plot(omega/2/np.pi, np.abs(ion_nonAdiabatic_reponse_full), label=rf'$\mathrm{{P}}_\mathrm{{nonAdiabaticReconFull}}$')
 
 
     ax3.set_xlabel('Frequency (PHz)')
@@ -147,7 +147,7 @@ def plot_ion_4(ion_QS, ion_y, ion_na, ion_na_reconstructed, nArate, delay, field
     
     plt.tight_layout()
 
-    pdf_filename = f'/home/user/TIPTOE/plot_ion_pdf/plot_ion_{lam0_pump}_{lam0_probe}_{I_pump:.2e}_{I_probe:.2e}.pdf'
+    pdf_filename = f'/home/user/TIPTOE-Hydrogen/plot_ion_pdf/plot_ion_{lam0_pump}_{lam0_probe}_{I_pump:.2e}_{I_probe:.2e}.pdf'
     with PdfPages(pdf_filename) as pdf:
         pdf.savefig(fig)
     
@@ -188,7 +188,7 @@ def plot_ion_4(ion_QS, ion_y, ion_na, ion_na_reconstructed, nArate, delay, field
 
     plt.tight_layout()
 
-    pdf_filename = f'/home/user/TIPTOE/plot_ion_pdf_reIm/plot_ion_{lam0_pump}_{lam0_probe}_{I_pump:.2e}_{I_probe:.2e}.pdf'
+    pdf_filename = f'/home/user/TIPTOE-Hydrogen/plot_ion_pdf_reIm/plot_ion_{lam0_pump}_{lam0_probe}_{I_pump:.2e}_{I_probe:.2e}.pdf'
     with PdfPages(pdf_filename) as pdf:
         pdf.savefig(fig)
     
@@ -275,8 +275,6 @@ file_params = [
     ("900nm_250nm_1.1e+14", 900, 1.1e14, 250, 6e8, 0.58, 0, -np.pi/2),
 ]
 
-#params = {'Multiplier': 0.3882164116834362, 'Ip': 0.5, 'αPol': 4.51, 'gamma': 2.5884503307457902, 'e0': 2.949636565127029, 'a0': 1, 'a1': 1.0, 'b0': 1.0, 'b1': 1, 'b2': 1, 'c2': 0.5336796560481161, 'p1': 3.5, 'd1': 0.22496851712539684}
-
 params = {'Multiplier': 0.20433986962624848, 'Ip': 0.5, 'αPol': 0.0, 'gamma': 3.0, 'e0': 1.878222261763161, 'a0': 1, 'a1': 2.4652434578177242, 'b0': 0.0, 'b1': 0.0, 'b2': 8.284076304163763, 'p1': 4.5, 'd_par': 0.9050141234871912, 'd1': 0.1508356872478652, 'c2': 1.7833025057465495}
 
 gamma=params['gamma']
@@ -291,7 +289,7 @@ for file_name, lam0_pump, I_pump, lam0_probe, I_probe, FWHM_probe, cep_pump, cep
     #lam0_probe = 200
     if REDO_comp:
         laser_pulses = LaserField(cache_results=True)
-        delay, ion_y = read_ion_Prob_data(f"/home/user/TIPTOE/process_all_files_output/ionProb_{file_name}.csv")
+        delay, ion_y = read_ion_Prob_data(f"/home/user/TIPTOE-Hydrogen/process_all_files_output/ionProb_{file_name}.csv")
         ion_qs = []
         ion_na = []
         ion_na_reconstructed = []
@@ -315,10 +313,10 @@ for file_name, lam0_pump, I_pump, lam0_probe, I_probe, FWHM_probe, cep_pump, cep
             laser_pulses.add_pulse(lam0_probe, I_probe, cep_probe, FWHM_probe/AtomicUnits.fs, t0=-tau)
             ion_na_reconstructed.append(1-np.exp(-na_background-np.trapz(na_grad*laser_pulses.Electric_Field(time_recon), time_recon))) #+na_grad2*laser_pulses.Electric_Field(time_recon)**2/2
             laser_pulses.reset()
-        output_file = f"/home/user/TIPTOE/plot_ion_tau_calc_output_data/ion_prob_{file_name}.csv"
+        output_file = f"/home/user/TIPTOE-Hydrogen/plot_ion_tau_calc_output_data/ion_prob_{file_name}.csv"
         write_csv_prob(output_file, delay, ion_y, ion_qs, ion_na, ion_na_reconstructed)
 
-    data_rate_delay = data_time_field = pd.read_csv(f"/home/user/TIPTOE/plot_ion_tau_calc_output_data/ion_prob_{file_name}.csv")
+    data_rate_delay = pd.read_csv(f"/home/user/TIPTOE-Hydrogen/plot_ion_tau_calc_output_data/ion_prob_{file_name}.csv")
     delay=np.array(data_rate_delay['delay'].values)
     ion_y=np.array(data_rate_delay['ion_y'].values)
     ion_na=np.array(data_rate_delay['ion_NA'].values)
@@ -334,6 +332,7 @@ for file_name, lam0_pump, I_pump, lam0_probe, I_probe, FWHM_probe, cep_pump, cep
     ion_qs_rate=analyticalRate(time_recon, laser_pulses, **params_qs)
     na_grad=np.gradient(ion_na_rate, laser_pulses.Electric_Field(time_recon))
     qs_grad=np.gradient(ion_qs_rate, laser_pulses.Electric_Field(time_recon))
+
     try:
         ion_na_reconstructed=np.array(data_rate_delay['ion_NA_reconstructed'].values)
     except:
@@ -347,7 +346,7 @@ for file_name, lam0_pump, I_pump, lam0_probe, I_probe, FWHM_probe, cep_pump, cep
             laser_pulses.reset()
         data_rate_delay['ion_NA_reconstructed']=np.array(ion_na_reconstructed)
         ion_na_reconstructed = np.array(data_rate_delay['ion_NA_reconstructed'].values)
-        output_file = f"/home/user/TIPTOE/plot_ion_tau_calc_output_data/ion_prob_{file_name}.csv"
+        output_file = f"/home/user/TIPTOE-Hydrogen/plot_ion_tau_calc_output_data/ion_prob_{file_name}.csv"
         write_csv_prob(output_file, delay, ion_y, ion_QS, ion_na, ion_na_reconstructed)
 
 
